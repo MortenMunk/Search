@@ -6,6 +6,14 @@ customtkinter.set_default_color_theme("dark-blue")
 
 app = customtkinter.CTk()
 
+maze_state = {}
+is_goal_placed = False
+is_start_placed = False
+EMPTY = 1
+START = "A"
+GOAL = "B"
+ROUTE = 0
+
 # reduce the minimum size of the application window, because I am too lazy for responsiveness
 app.minsize(600,600)
 app.geometry("800x800")
@@ -14,9 +22,56 @@ app.title("DFS and BFS")
 def open_url(url):
    webbrowser.open_new_tab(url)
 
+
 def switch_event():
     print("switch toggled, current value:", switch_var.get())
 
+
+def change_cell_state(event):
+    global is_start_placed
+    global is_goal_placed
+    widget = event.widget
+    row = widget.master.grid_info()["row"]
+    col = widget.master.grid_info()["column"]
+    if event.num == 1:
+        if maze_state.get((row, col), EMPTY) == EMPTY:
+            maze_state[(row, col)] = ROUTE
+            print("Route placed")
+        elif maze_state.get((row, col), EMPTY) == ROUTE:
+            maze_state[(row, col)] = EMPTY
+            print("Route removed")
+        elif maze_state.get((row, col), EMPTY) == START or maze_state.get((row, col), EMPTY) == GOAL:
+            print("Cannot place route on goal or start")
+        else:
+            print("undefined error")
+    elif event.num == 3:
+        if maze_state.get((row, col), EMPTY) == EMPTY or maze_state.get((row, col), ROUTE) == ROUTE:
+            if is_start_placed and not is_goal_placed:
+                maze_state[(row, col)] = GOAL
+                is_goal_placed = True
+                print("goal placed")
+            elif not is_start_placed and is_goal_placed:
+                maze_state[(row, col)] = START
+                is_start_placed = True
+                print("start placed")
+            elif not is_start_placed and not is_goal_placed:
+                maze_state[(row, col)] = START
+                is_start_placed = True
+                print("start placed")
+            elif is_goal_placed and is_start_placed:
+                print("both start and goal placed")
+        elif maze_state.get((row, col), START) == START:
+            maze_state[(row, col)] = EMPTY
+            is_start_placed = False
+            print("start removed")
+        elif maze_state.get((row, col), GOAL) == GOAL:
+            maze_state[(row, col)] = EMPTY
+            print("goal removed")
+        else: 
+            print("undefined error")
+            
+
+    
 
 def generate_grid():
     x_axis = int(x_axis_entry.get())
@@ -29,10 +84,14 @@ def generate_grid():
     grid_frame= customtkinter.CTkFrame(master=content_frame)
     grid_frame.pack(side=customtkinter.TOP, pady=10)
 
+    # Creating 2d grid
     for row in range(y_axis):
         for col in range(x_axis):
             cell = customtkinter.CTkFrame(master=grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
             cell.grid(row=row, column=col, padx=0, pady=0,)
+            cell.bind("<Button-1>", change_cell_state)
+            cell.bind("<Button-3>", change_cell_state)
+
 
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
 content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
