@@ -13,6 +13,7 @@ EMPTY = 1
 START = "A"
 GOAL = "B"
 ROUTE = 0
+grid_frame = None
 
 # reduce the minimum size of the application window, because I am too lazy for responsiveness
 app.minsize(600,600)
@@ -28,14 +29,14 @@ def switch_event():
 
 
 def change_cell_state(event):
-    global is_start_placed
-    global is_goal_placed
+    global is_start_placed, is_goal_placed
     widget = event.widget
     row = widget.master.grid_info()["row"]
     col = widget.master.grid_info()["column"]
     if event.num == 1:
         if maze_state.get((row, col), EMPTY) == EMPTY:
             maze_state[(row, col)] = ROUTE
+            widget.configure(fg_color="white")
             print("Route placed")
         elif maze_state.get((row, col), EMPTY) == ROUTE:
             maze_state[(row, col)] = EMPTY
@@ -74,14 +75,17 @@ def change_cell_state(event):
     
 
 def generate_grid():
+    global grid_frame
     x_axis = int(x_axis_entry.get())
     y_axis = int(y_axis_entry.get())
     
     # clear existing grid, if any
-    if "grid-frame" in globals():
-        grid_frame.destroy()
+    if grid_frame is not None:
+        for widget in grid_frame.winfo_children():
+            widget.destroy()
+        grid_frame.pack_forget()
 
-    grid_frame= customtkinter.CTkFrame(master=content_frame)
+    grid_frame = customtkinter.CTkFrame(master=content_frame)
     grid_frame.pack(side=customtkinter.TOP, pady=10)
 
     # Creating 2d grid
