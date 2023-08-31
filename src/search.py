@@ -17,6 +17,23 @@ def open_url(url):
 def switch_event():
     print("switch toggled, current value:", switch_var.get())
 
+
+def generate_grid():
+    x_axis = int(x_axis_entry.get())
+    y_axis = int(y_axis_entry.get())
+    
+    # clear existing grid, if any
+    if "grid-frame" in globals():
+        grid_frame.destroy()
+
+    grid_frame= customtkinter.CTkFrame(master=content_frame)
+    grid_frame.pack(side=customtkinter.TOP, pady=10)
+
+    for row in range(y_axis):
+        for col in range(x_axis):
+            cell = customtkinter.CTkFrame(master=grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
+            cell.grid(row=row, column=col, padx=0, pady=0,)
+
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
 content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
 
@@ -32,6 +49,9 @@ times_label.pack(side=customtkinter.LEFT)
 
 y_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="y axis cells", width=75)
 y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
+
+grid_btn = customtkinter.CTkButton(master=entry_frame, text="Generate grid", command=generate_grid)
+grid_btn.pack(side=customtkinter.LEFT, padx=(0,20))
 
 
 # switch frame
@@ -59,6 +79,7 @@ navbar_btns.pack(side=customtkinter.TOP, pady=10)
 
 source_btn = customtkinter.CTkButton(master=navbar_btns, text="Source Code")
 source_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
+source_btn.bind("<Button-1>", lambda e:open_url("https://github.com/MortenMunk/Search/tree/main"))
 
 help_btn = customtkinter.CTkButton(master=navbar_btns, text="Documentation")
 help_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
@@ -66,7 +87,7 @@ help_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
 contact_btn = customtkinter.CTkButton(master=navbar_btns, text="Contact")
 contact_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
 
-# navbar link
+# bottom link
 github_link = customtkinter.CTkLabel(master=navbar, text="Made by Morten Munk", cursor="hand2", text_color="grey")
 github_link.pack(side=customtkinter.BOTTOM, pady=10)
 github_link.bind("<Button-1>", lambda e:open_url("https://github.com/MortenMunk"))
