@@ -5,6 +5,9 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 app = customtkinter.CTk()
+
+# reduce the minimum size of the application window, because I am too lazy for responsiveness
+app.minsize(600,600)
 app.geometry("800x800")
 app.title("DFS and BFS")
 
@@ -14,11 +17,27 @@ def open_url(url):
 def switch_event():
     print("switch toggled, current value:", switch_var.get())
 
-content_frame = customtkinter.CTkFrame(master=app)
+content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
 content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
 
+# x and y axis entries
+entry_frame = customtkinter.CTkFrame(master=content_frame)
+entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
+
+x_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="x axis cells", width=75)
+x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
+
+times_label = customtkinter.CTkLabel(master=entry_frame, text="X")
+times_label.pack(side=customtkinter.LEFT)
+
+y_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="y axis cells", width=75)
+y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
+
+
+# switch frame
+
 switch_frame = customtkinter.CTkFrame(master=content_frame)
-switch_frame.pack(side=customtkinter.TOP, pady=10)
+switch_frame.pack(side=customtkinter.BOTTOM, pady=10)
 
 switch_label_dfs = customtkinter.CTkLabel(master=switch_frame, text="Depth-first")
 switch_label_dfs.pack(side=customtkinter.LEFT, padx=(20,5))
@@ -30,11 +49,8 @@ switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
 
 
 
-
-
-
 # Bottom bar frame
-navbar = customtkinter.CTkFrame(master=app, height=50)
+navbar = customtkinter.CTkFrame(master=app, height=50, border_width=1, border_color="grey")
 navbar.pack(fill=customtkinter.X, side=customtkinter.BOTTOM, pady=10, padx=10)
 
 # navbar buttons
