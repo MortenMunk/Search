@@ -36,10 +36,11 @@ def change_cell_state(event):
     if event.num == 1:
         if maze_state.get((row, col), EMPTY) == EMPTY:
             maze_state[(row, col)] = ROUTE
-            widget.configure(fg_color="white")
+            widget.master.configure(fg_color="white")
             print("Route placed")
         elif maze_state.get((row, col), EMPTY) == ROUTE:
             maze_state[(row, col)] = EMPTY
+            widget.master.configure(fg_color="black")
             print("Route removed")
         elif maze_state.get((row, col), EMPTY) == START or maze_state.get((row, col), EMPTY) == GOAL:
             print("Cannot place route on goal or start")
@@ -49,24 +50,29 @@ def change_cell_state(event):
         if maze_state.get((row, col), EMPTY) == EMPTY or maze_state.get((row, col), ROUTE) == ROUTE:
             if is_start_placed and not is_goal_placed:
                 maze_state[(row, col)] = GOAL
+                widget.master.configure(fg_color="green")
                 is_goal_placed = True
                 print("goal placed")
             elif not is_start_placed and is_goal_placed:
                 maze_state[(row, col)] = START
+                widget.master.configure(fg_color="yellow")
                 is_start_placed = True
                 print("start placed")
             elif not is_start_placed and not is_goal_placed:
                 maze_state[(row, col)] = START
                 is_start_placed = True
+                widget.master.configure(fg_color="yellow")
                 print("start placed")
             elif is_goal_placed and is_start_placed:
                 print("both start and goal placed")
         elif maze_state.get((row, col), START) == START:
             maze_state[(row, col)] = EMPTY
             is_start_placed = False
+            widget.master.configure(fg_color="black")
             print("start removed")
         elif maze_state.get((row, col), GOAL) == GOAL:
             maze_state[(row, col)] = EMPTY
+            widget.master.configure(fg_color="black")
             print("goal removed")
         else: 
             print("undefined error")
