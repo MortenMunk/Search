@@ -110,8 +110,17 @@ def generate_grid():
     save_maze_frame = customtkinter.CTkFrame(master=content_frame)
     save_maze_frame.pack(side=customtkinter.TOP)
 
-    save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze")
+    save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=save_maze)
     save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+
+def save_maze():
+    file_path = "maze.txt"
+    values = list(maze_state.values())
+    text = str(values)[1:-1].replace(",", "").replace(" ", "").replace("'", "")
+    result = ''.join(text)
+
+    with open(file_path, 'w') as file:
+        file.write(result)
 
 
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
