@@ -5,14 +5,13 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 app = customtkinter.CTk()
-
 maze_state = {}
 is_goal_placed = False
 is_start_placed = False
-EMPTY = 1
+EMPTY = 0
 START = "A"
 GOAL = "B"
-ROUTE = 0
+ROUTE = 1
 grid_frame = None
 
 # reduce the minimum size of the application window, because I am too lazy for responsiveness
@@ -29,7 +28,8 @@ def switch_event():
 
 
 def change_cell_state(event):
-    global is_start_placed, is_goal_placed
+    global maze_state, is_start_placed, is_goal_placed
+    print(maze_state.values())
     widget = event.widget
     row = widget.master.grid_info()["row"]
     col = widget.master.grid_info()["column"]
@@ -72,6 +72,7 @@ def change_cell_state(event):
             print("start removed")
         elif maze_state.get((row, col), GOAL) == GOAL:
             maze_state[(row, col)] = EMPTY
+            is_goal_placed = False
             widget.master.configure(fg_color="black")
             print("goal removed")
         else: 
@@ -81,12 +82,14 @@ def change_cell_state(event):
     
 
 def generate_grid():
-    global grid_frame
+    global maze_state, grid_frame
     x_axis = int(x_axis_entry.get())
     y_axis = int(y_axis_entry.get())
     
     # clear existing grid, if any
     if grid_frame is not None:
+        save_maze_frame.destroy()
+        maze_state.clear()
         for widget in grid_frame.winfo_children():
             widget.destroy()
         grid_frame.pack_forget()
@@ -97,10 +100,18 @@ def generate_grid():
     # Creating 2d grid
     for row in range(y_axis):
         for col in range(x_axis):
+            maze_state[(row, col)] = EMPTY
             cell = customtkinter.CTkFrame(master=grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
             cell.grid(row=row, column=col, padx=0, pady=0,)
             cell.bind("<Button-1>", change_cell_state)
             cell.bind("<Button-3>", change_cell_state)
+
+    # save maze button
+    save_maze_frame = customtkinter.CTkFrame(master=content_frame)
+    save_maze_frame.pack(side=customtkinter.TOP)
+
+    save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze")
+    save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
 
 
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
@@ -123,12 +134,13 @@ grid_btn = customtkinter.CTkButton(master=entry_frame, text="Generate grid", com
 grid_btn.pack(side=customtkinter.LEFT, padx=(0,20))
 
 
+
 # switch frame
 
 switch_frame = customtkinter.CTkFrame(master=content_frame)
 switch_frame.pack(side=customtkinter.BOTTOM, pady=10)
 
-switch_label_dfs = customtkinter.CTkLabel(master=switch_frame, text="Depth-first")
+switch_label_dfs = customtkinter.CTkLabel(master=switch_frame, text="Depth-first", cursor="hand2")
 switch_label_dfs.pack(side=customtkinter.LEFT, padx=(20,5))
 
 switch_var = customtkinter.StringVar(value="DFS")
@@ -146,14 +158,14 @@ navbar.pack(fill=customtkinter.X, side=customtkinter.BOTTOM, pady=10, padx=10)
 navbar_btns = customtkinter.CTkFrame(master=navbar)
 navbar_btns.pack(side=customtkinter.TOP, pady=10)
 
-source_btn = customtkinter.CTkButton(master=navbar_btns, text="Source Code")
+source_btn = customtkinter.CTkButton(master=navbar_btns, text="Source Code", cursor="hand2")
 source_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
 source_btn.bind("<Button-1>", lambda e:open_url("https://github.com/MortenMunk/Search/tree/main"))
 
-help_btn = customtkinter.CTkButton(master=navbar_btns, text="Documentation")
+help_btn = customtkinter.CTkButton(master=navbar_btns, text="Documentation", cursor="hand2")
 help_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
 
-contact_btn = customtkinter.CTkButton(master=navbar_btns, text="Contact")
+contact_btn = customtkinter.CTkButton(master=navbar_btns, text="Contact", cursor="hand2")
 contact_btn.pack(side=customtkinter.LEFT, pady=15, padx=20)
 
 # bottom link
