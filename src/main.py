@@ -1,3 +1,4 @@
+from tkinter import filedialog
 import customtkinter
 import webbrowser
 
@@ -80,7 +81,6 @@ def change_cell_state(event):
             
 
     
-
 def generate_grid():
     global maze_state, grid_frame
     x_axis = int(x_axis_entry.get())
@@ -114,13 +114,12 @@ def generate_grid():
     save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
 
 def save_maze():
-    file_path = "maze.txt"
+    file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     values = list(maze_state.values())
     text = str(values)[1:-1].replace(",", "").replace(" ", "").replace("'", "")
-    result = ''.join(text)
 
     with open(file_path, 'w') as file:
-        file.write(result)
+        file.write(text)
 
 
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
