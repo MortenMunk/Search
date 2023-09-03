@@ -82,7 +82,7 @@ def change_cell_state(event):
 
     
 def generate_grid():
-    global maze_state, grid_frame
+    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis, save_maze_frame
     x_axis = int(x_axis_entry.get())
     y_axis = int(y_axis_entry.get())
     
@@ -90,6 +90,8 @@ def generate_grid():
     if grid_frame is not None:
         save_maze_frame.destroy()
         maze_state.clear()
+        is_goal_placed = False
+        is_start_placed = False
         for widget in grid_frame.winfo_children():
             widget.destroy()
         grid_frame.pack_forget()
@@ -156,7 +158,12 @@ switch = customtkinter.CTkSwitch(master=switch_frame, command=switch_event, text
 switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
 
 
+# load maze frame
+load_maze_frame = customtkinter.CTkFrame(master=content_frame)
+load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
 
+load_maze_btn = customtkinter.CTkButton(master=load_maze_frame, text="Load maze", cursor="hand2")
+load_maze_btn.pack(side=customtkinter.LEFT, padx=10, pady=10)
 
 # Bottom bar frame
 navbar = customtkinter.CTkFrame(master=app, height=50, border_width=1, border_color="grey")
