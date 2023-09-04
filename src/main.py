@@ -2,6 +2,8 @@ from tkinter import filedialog
 import customtkinter
 import webbrowser
 
+from exceptions import InvalidGridDimension, InvalidGridValue
+
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
@@ -83,8 +85,32 @@ def change_cell_state(event):
     
 def generate_grid():
     global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis, save_maze_frame
-    x_axis = int(x_axis_entry.get())
-    y_axis = int(y_axis_entry.get())
+    
+    try:
+        if x_axis_entry.get() is None or y_axis_entry.get() is None:
+            raise TypeError
+        elif y_axis_entry.get().isnumeric() is False or x_axis_entry.get().isnumeric is False:
+            raise InvalidGridValue
+        elif int(y_axis_entry.get()) > 10 or int(x_axis_entry.get()) > 10:
+            raise InvalidGridDimension
+        elif int(y_axis_entry.get()) < 3 or int(x_axis_entry.get()) < 3:
+            raise InvalidGridDimension
+        else:
+            x_axis = int(x_axis_entry.get())
+            y_axis = int(y_axis_entry.get())
+    except InvalidGridDimension as e:
+        print(e.message)
+        x_axis = None
+        y_axis = None
+    except InvalidGridValue as e:
+        print(e.message)
+        x_axis = None
+        y_axis = None
+    except TypeError as e:
+        print(e)
+        x_axis = None
+        y_axis = None
+
     
     # clear existing grid, if any
     if grid_frame is not None:
@@ -96,24 +122,26 @@ def generate_grid():
             widget.destroy()
         grid_frame.pack_forget()
 
-    grid_frame = customtkinter.CTkFrame(master=content_frame)
-    grid_frame.pack(side=customtkinter.TOP, pady=10)
 
     # Creating 2d grid
-    for row in range(y_axis):
-        for col in range(x_axis):
-            maze_state[(row, col)] = EMPTY
-            cell = customtkinter.CTkFrame(master=grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
-            cell.grid(row=row, column=col, padx=0, pady=0,)
-            cell.bind("<Button-1>", change_cell_state)
-            cell.bind("<Button-3>", change_cell_state)
+    if x_axis is not None and y_axis is not None:
+        grid_frame = customtkinter.CTkFrame(master=content_frame)
+        grid_frame.pack(side=customtkinter.TOP, pady=10)
 
-    # save maze button
-    save_maze_frame = customtkinter.CTkFrame(master=content_frame)
-    save_maze_frame.pack(side=customtkinter.TOP)
+        for row in range(y_axis):
+            for col in range(x_axis):
+                maze_state[(row, col)] = EMPTY
+                cell = customtkinter.CTkFrame(master=grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
+                cell.grid(row=row, column=col, padx=0, pady=0,)
+                cell.bind("<Button-1>", change_cell_state)
+                cell.bind("<Button-3>", change_cell_state)
 
-    save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=save_maze)
-    save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+        # save maze button
+        save_maze_frame = customtkinter.CTkFrame(master=content_frame)
+        save_maze_frame.pack(side=customtkinter.TOP)
+
+        save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=save_maze)
+        save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
 
 def save_maze():
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
@@ -131,13 +159,13 @@ content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
 entry_frame = customtkinter.CTkFrame(master=content_frame)
 entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
 
-x_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="x axis cells", width=75)
+x_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="Columns", width=75)
 x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
 
 times_label = customtkinter.CTkLabel(master=entry_frame, text="X")
 times_label.pack(side=customtkinter.LEFT)
 
-y_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="y axis cells", width=75)
+y_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="Rows", width=75)
 y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
 
 grid_btn = customtkinter.CTkButton(master=entry_frame, text="Generate grid", command=generate_grid)
