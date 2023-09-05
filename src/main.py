@@ -149,11 +149,13 @@ def generate_grid():
 
 
 def save_maze():
+    global x_axis, y_axis
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     values = list(maze_state.values())
     text = str(values)[1:-1].replace(",", "").replace(" ", "").replace("'", "")
 
     with open(file_path, 'w') as file:
+        file.write(f"{x_axis}x{y_axis}\n")
         file.write(text)
 
 
