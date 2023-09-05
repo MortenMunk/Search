@@ -5,3 +5,10 @@ class InvalidGridDimension(Exception):
 class InvalidGridValue(Exception):
     message = "Grid dimension values must be integers"
     pass
+
+class MazeNeedsStartAndGoal(Exception):
+    message = "Maze must contain a start and a goal"
+    pass
+
+class MazeIllegalChar(Exception):
+    message = "Maze can only contain A, B, 1's, and 0's"

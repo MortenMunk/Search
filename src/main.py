@@ -2,7 +2,7 @@ from tkinter import filedialog
 import customtkinter
 import webbrowser
 
-from exceptions import InvalidGridDimension, InvalidGridValue
+from exceptions import *
 
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
@@ -11,16 +11,21 @@ app = customtkinter.CTk()
 maze_state = {}
 is_goal_placed = False
 is_start_placed = False
+grid_frame = None
+
 EMPTY = 0
 START = "A"
 GOAL = "B"
 ROUTE = 1
-grid_frame = None
+
 
 # reduce the minimum size of the application window, because I am too lazy for responsiveness
 app.minsize(600,600)
 app.geometry("800x800")
 app.title("DFS and BFS")
+
+def occurs_once(list, item):
+    return list.count(item) == 1
 
 def open_url(url):
    webbrowser.open_new_tab(url)
@@ -110,7 +115,6 @@ def generate_grid():
         print(e)
         x_axis = None
         y_axis = None
-
     
     # clear existing grid, if any
     if grid_frame is not None:
@@ -143,6 +147,7 @@ def generate_grid():
         save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=save_maze)
         save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
 
+
 def save_maze():
     file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     values = list(maze_state.values())
@@ -150,6 +155,28 @@ def save_maze():
 
     with open(file_path, 'w') as file:
         file.write(text)
+
+
+def load_maze():
+    global x_axis, y_axis
+    file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+    with open(file_path, "r") as file:
+        maze_text = list(file)
+        try:
+            if occurs_once(maze_text, str(START)) and occurs_once(maze_text, str(GOAL)):
+                for character in maze_text:
+                    if character is not {"A", "B", "1", "0"}:
+                        raise MazeIllegalChar
+                    else:
+                        print("Nice")
+            else:
+                raise MazeNeedsStartAndGoal
+        except MazeNeedsStartAndGoal as e:
+            print(e.message)
+        except MazeIllegalChar as e:
+            print(e.message)    
+
+
 
 
 content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
