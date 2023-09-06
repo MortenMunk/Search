@@ -8,11 +8,15 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 app = customtkinter.CTk()
+
+# Globals
 maze_state = {}
 is_goal_placed = False
 is_start_placed = False
 grid_frame = None
 
+
+# Maze cell states
 EMPTY = 0
 START = "A"
 GOAL = "B"
@@ -37,7 +41,6 @@ def switch_event():
 
 def change_cell_state(event):
     global maze_state, is_start_placed, is_goal_placed
-    print(maze_state.values())
     widget = event.widget
     row = widget.master.grid_info()["row"]
     col = widget.master.grid_info()["column"]
@@ -87,36 +90,8 @@ def change_cell_state(event):
             print("undefined error")
             
 
-    
-def generate_grid():
-    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis, save_maze_frame
-    
-    try:
-        if x_axis_entry.get() is None or y_axis_entry.get() is None:
-            raise TypeError
-        elif y_axis_entry.get().isnumeric() is False or x_axis_entry.get().isnumeric is False:
-            raise InvalidGridValue
-        elif int(y_axis_entry.get()) > 10 or int(x_axis_entry.get()) > 10:
-            raise InvalidGridDimension
-        elif int(y_axis_entry.get()) < 3 or int(x_axis_entry.get()) < 3:
-            raise InvalidGridDimension
-        else:
-            x_axis = int(x_axis_entry.get())
-            y_axis = int(y_axis_entry.get())
-    except InvalidGridDimension as e:
-        print(e.message)
-        x_axis = None
-        y_axis = None
-    except InvalidGridValue as e:
-        print(e.message)
-        x_axis = None
-        y_axis = None
-    except TypeError as e:
-        print(e)
-        x_axis = None
-        y_axis = None
-    
-    # clear existing grid, if any
+def handle_grid():
+    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis
     if grid_frame is not None:
         save_maze_frame.destroy()
         maze_state.clear()
@@ -146,6 +121,38 @@ def generate_grid():
 
         save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=save_maze)
         save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+
+
+    
+def generate_grid():
+    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis
+    
+    try:
+        if x_axis_entry.get() is None or y_axis_entry.get() is None:
+            raise TypeError
+        elif y_axis_entry.get().isnumeric() is False or x_axis_entry.get().isnumeric is False:
+            raise InvalidGridValue
+        elif int(y_axis_entry.get()) > 10 or int(x_axis_entry.get()) > 10:
+            raise InvalidGridDimension
+        elif int(y_axis_entry.get()) < 3 or int(x_axis_entry.get()) < 3:
+            raise InvalidGridDimension
+        else:
+            x_axis = int(x_axis_entry.get())
+            y_axis = int(y_axis_entry.get())
+    except InvalidGridDimension as e:
+        print(e.message)
+        x_axis = None
+        y_axis = None
+    except InvalidGridValue as e:
+        print(e.message)
+        x_axis = None
+        y_axis = None
+    except TypeError as e:
+        print(e)
+        x_axis = None
+        y_axis = None
+    
+    handle_grid()
 
 
 def save_maze():
