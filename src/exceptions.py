@@ -12,3 +12,8 @@ class MazeNeedsStartAndGoal(Exception):
 
 class MazeIllegalChar(Exception):
     message = "Maze can only contain A, B, 1's, and 0's"
+    pass
+
+class TooManyLinesInFile(Exception):
+    message = "Your file has too many lines"
+    pass

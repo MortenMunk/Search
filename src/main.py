@@ -157,26 +157,42 @@ def save_maze():
     with open(file_path, 'w') as file:
         file.write(f"{x_axis}x{y_axis}\n")
         file.write(text)
+        file.close()
 
 
 def load_maze():
     global x_axis, y_axis
     file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     with open(file_path, "r") as file:
-        maze_text = list(file)
+        maze_text = file.readlines()
+        count = 0
         try:
-            if occurs_once(maze_text, str(START)) and occurs_once(maze_text, str(GOAL)):
-                for character in maze_text:
-                    if character is not {"A", "B", "1", "0"}:
-                        raise MazeIllegalChar
+            for line in maze_text:
+                if count == 0:
+                    dimensions = line.split('x')
+                    x_axis = int(dimensions[0])
+                    y_axis = int(dimensions[1])
+                    count += 1
+                    break
+                elif count == 1:
+                    if occurs_once(line, str(START)) and occurs_once(line, str(GOAL)):
+                        for character in line:
+                            if character is not {"A", "B", "1", "0"}:
+                                raise MazeIllegalChar
+                            else:
+                                print("Nice")
+                                count += 1
+                                break
                     else:
-                        print("Nice")
-            else:
-                raise MazeNeedsStartAndGoal
+                        raise MazeNeedsStartAndGoal
+                else:
+                    raise TooManyLinesInFile
         except MazeNeedsStartAndGoal as e:
             print(e.message)
         except MazeIllegalChar as e:
-            print(e.message)    
+            print(e.message)  
+        except TooManyLinesInFile as e:
+            print(e.message)  
 
 
 
@@ -219,7 +235,7 @@ switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
 load_maze_frame = customtkinter.CTkFrame(master=content_frame)
 load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
 
-load_maze_btn = customtkinter.CTkButton(master=load_maze_frame, text="Load maze", cursor="hand2")
+load_maze_btn = customtkinter.CTkButton(master=load_maze_frame, text="Load maze", cursor="hand2", command=load_maze)
 load_maze_btn.pack(side=customtkinter.LEFT, padx=10, pady=10)
 
 # Bottom bar frame
