@@ -10,6 +10,7 @@ customtkinter.set_default_color_theme("dark-blue")
 app = customtkinter.CTk()
 
 # Globals
+save_maze_frame = None
 maze_state = {}
 is_goal_placed = False
 is_start_placed = False
@@ -91,9 +92,10 @@ def change_cell_state(event):
             
 
 def handle_grid():
-    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis
+    global maze_state, grid_frame, is_start_placed, is_goal_placed, x_axis, y_axis, save_maze_frame
     if grid_frame is not None:
-        save_maze_frame.destroy()
+        if save_maze_frame is not None:
+            save_maze_frame.destroy()
         maze_state.clear()
         is_goal_placed = False
         is_start_placed = False
@@ -170,51 +172,74 @@ def save_maze():
 def load_maze():
     global x_axis, y_axis, maze_state, grid_frame, is_start_placed, is_goal_placed
     file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+
+    # read from file, and split into lines
     with open(file_path, "r") as file:
-        maze_text = file.readlines()
-        count = 0
-        try:
-            if len(maze_text) < 2:
-                raise NotEnoughLinesInFile
-                
+        maze_lines = file.readlines()
 
+    # if less than 2 lines, then the file does not follow correct format
+    try:
+        if len(maze_lines) < 2:
+            raise NotEnoughLinesInFile
+    except NotEnoughLinesInFile as e:
+        print(e.message)
+        return
 
+    # Checks if there is x and y values that are numeric
+    try:
+        dimensions = maze_lines[0].strip().split('x')
+        if len(dimensions) != 2 or not dimensions[0].isdigit() or not dimensions[1].isdigit():
+            raise InvalidGridDimension
+    except InvalidGridDimension as e:
+        print(e.message)
+        return
 
-            for line in maze_text:
-                if count == 0:
-                    dimensions = line.split('x')
-                    x_axis = int(dimensions[0])
-                    y_axis = int(dimensions[1])
-                    count += 1
-                    break
-                elif count == 1:
-                    if occurs_once(line, str(START)) and occurs_once(line, str(GOAL)):
-                        for character in line:
-                            if character is not {"A", "B", "1", "0"}:
-                                raise MazeIllegalChar
-                            else:
-                                print("Nice")
-                                count += 1
-                                break
-                    else:
-                        raise MazeNeedsStartAndGoal
-                else:
-                    raise TooManyLinesInFile
-        except MazeNeedsStartAndGoal as e:
-            print(e.message)
-            return
-        except MazeIllegalChar as e:
-            print(e.message)
-            return  
-        except TooManyLinesInFile as e:
-            print(e.message)
-            return
-        except NotEnoughLinesInFile as e:
-            print (e.message)
-            return
-        finally:
-            file.close()
+    x_axis = int(dimensions[0])
+    y_axis = int(dimensions[1])
 
+    # checks the maze data has enough coordinates
+    try:
+        if len(maze_lines[1].strip()) != x_axis * y_axis:
+            raise InvalidGridValue
+    except InvalidGridValue as e:
+        print(e.message)
+        return
+            
+    # save second line of file as maze data
+    maze_data = maze_lines[1].strip()
+
+    handle_grid()
+
+    for row in range(y_axis):
+        for col in range(x_axis):
+            index = row * x_axis + col
+            char = maze_data[index]
+
+            if char == 'A':
+                maze_state[(row, col)] = START
+            elif char == 'B':
+                maze_state[(row, col)] = GOAL
+            elif char == '1':
+                maze_state[(row, col)] = ROUTE
+            elif char == '0':
+                maze_state[(row, col)] = EMPTY
+
+    # Redraw the maze based on the updated maze_state
+    for row in range(y_axis):
+        for col in range(x_axis):
+            cell_value = maze_state.get((row, col), EMPTY)
+            cell = grid_frame.grid_slaves(row=row, column=col)[0]
+            if cell_value == ROUTE:
+                cell.configure(fg_color="white")
+            elif cell_value == START:
+                cell.configure(fg_color="yellow")
+            elif cell_value == GOAL:
+                cell.configure(fg_color="green")
+            elif cell_value == EMPTY:
+                cell.configure(fg_color="black")
+
+    is_start_placed = any(val == START for val in maze_state.values())
+    is_goal_placed = any(val == GOAL for val in maze_state.values())
 
 
 
