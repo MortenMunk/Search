@@ -168,12 +168,18 @@ def save_maze():
 
 
 def load_maze():
-    global x_axis, y_axis
+    global x_axis, y_axis, maze_state, grid_frame, is_start_placed, is_goal_placed
     file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
     with open(file_path, "r") as file:
         maze_text = file.readlines()
         count = 0
         try:
+            if len(maze_text) < 2:
+                raise NotEnoughLinesInFile
+                
+
+
+
             for line in maze_text:
                 if count == 0:
                     dimensions = line.split('x')
@@ -196,10 +202,18 @@ def load_maze():
                     raise TooManyLinesInFile
         except MazeNeedsStartAndGoal as e:
             print(e.message)
+            return
         except MazeIllegalChar as e:
-            print(e.message)  
+            print(e.message)
+            return  
         except TooManyLinesInFile as e:
-            print(e.message)  
+            print(e.message)
+            return
+        except NotEnoughLinesInFile as e:
+            print (e.message)
+            return
+        finally:
+            file.close()
 
 
 

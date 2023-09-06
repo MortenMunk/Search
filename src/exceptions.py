@@ -17,3 +17,7 @@ class MazeIllegalChar(Exception):
 class TooManyLinesInFile(Exception):
     message = "Your file has too many lines"
     pass
+
+class NotEnoughLinesInFile(Exception):
+    message = "Not enough lines in file"
+    pass
