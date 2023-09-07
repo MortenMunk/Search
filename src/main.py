@@ -7,8 +7,6 @@ from exceptions import *
 customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
-app = customtkinter.CTk()
-
 # Globals
 save_maze_frame = None
 maze_state = {}
@@ -23,12 +21,6 @@ START = "A"
 GOAL = "B"
 ROUTE = 1
 
-
-# reduce the minimum size of the application window, because I am too lazy for responsiveness
-app.minsize(600,600)
-app.geometry("800x800")
-app.title("DFS and BFS")
-
 def occurs_once(list, item):
     return list.count(item) == 1
 
@@ -36,8 +28,80 @@ def open_url(url):
    webbrowser.open_new_tab(url)
 
 
-def switch_event():
-    print("switch toggled, current value:", switch_var.get())
+class App(customtkinter.CTk):
+    def __init__(self):
+        super().__init__()
+
+        # reduce the minimum size of the application window, because I am too lazy for responsiveness
+        self.minsize(600,600)
+        self.geometry("800x800")
+        self.title("DFS and BFS")
+
+        # Content Frame
+        self.content_frame = ContentFrame(self)
+        self.content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
+
+        # Bottom Navbar Frame
+        self.navbar = NavbarFrame(self)
+        navbar.pack(fill=customtkinter.X, side=customtkinter.BOTTOM, pady=10, padx=10)
+
+
+
+class ContentFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        # Entry frame
+        self.entry_frame = EntryFrame(self)
+        self.entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
+
+        # Switch frame
+        self.switch_frame = SwitchFrame(self)
+        self.switch_frame.pack(side=customtkinter.BOTTOM, pady=10)
+
+        # Load Maze Frame
+        self.load_maze_frame = LoadMazeFrame(self)
+        self.load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
+
+
+class SwitchFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        switch_label_dfs = customtkinter.CTkLabel(self, text="Depth-first", cursor="hand2")
+        switch_label_dfs.pack(side=customtkinter.LEFT, padx=(20,5))
+
+        switch_var = customtkinter.StringVar(value="DFS")
+        switch = customtkinter.CTkSwitch(self, command=switch_event, text="Breadth-first", variable=switch_var, onvalue="DFS", offvalue="BFS", switch_width=40)
+        switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
+
+        def switch_event():
+            print("switch toggled, current value:", switch_var.get())
+
+
+class EntryFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        x_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Columns", width=75)
+        x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
+
+        times_label = customtkinter.CTkLabel(self, text="X")
+        times_label.pack(side=customtkinter.LEFT)
+
+        y_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Rows", width=75)
+        y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
+
+        grid_btn = customtkinter.CTkButton(self, text="Generate grid", command=generate_grid)
+        grid_btn.pack(side=customtkinter.LEFT, padx=(0,20))
+
+
+class LoadMazeFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        load_maze_btn = customtkinter.CTkButton(self, text="Load maze", cursor="hand2", command=load_maze)
+        load_maze_btn.pack(side=customtkinter.LEFT, padx=10, pady=10)
 
 
 def change_cell_state(event):
@@ -243,50 +307,21 @@ def load_maze():
 
 
 
-content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
-content_frame.pack(fill=customtkinter.BOTH, expand=True, padx=10, pady=10)
-
-# x and y axis entries
-entry_frame = customtkinter.CTkFrame(master=content_frame)
-entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
-
-x_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="Columns", width=75)
-x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
-
-times_label = customtkinter.CTkLabel(master=entry_frame, text="X")
-times_label.pack(side=customtkinter.LEFT)
-
-y_axis_entry = customtkinter.CTkEntry(master=entry_frame, placeholder_text="Rows", width=75)
-y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
-
-grid_btn = customtkinter.CTkButton(master=entry_frame, text="Generate grid", command=generate_grid)
-grid_btn.pack(side=customtkinter.LEFT, padx=(0,20))
+# content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
 
 
 
-# switch frame
-
-switch_frame = customtkinter.CTkFrame(master=content_frame)
-switch_frame.pack(side=customtkinter.BOTTOM, pady=10)
-
-switch_label_dfs = customtkinter.CTkLabel(master=switch_frame, text="Depth-first", cursor="hand2")
-switch_label_dfs.pack(side=customtkinter.LEFT, padx=(20,5))
-
-switch_var = customtkinter.StringVar(value="DFS")
-switch = customtkinter.CTkSwitch(master=switch_frame, command=switch_event, text="Breadth-first", variable=switch_var, onvalue="DFS", offvalue="BFS", switch_width=40)
-switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
 
 
-# load maze frame
-load_maze_frame = customtkinter.CTkFrame(master=content_frame)
-load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
 
-load_maze_btn = customtkinter.CTkButton(master=load_maze_frame, text="Load maze", cursor="hand2", command=load_maze)
-load_maze_btn.pack(side=customtkinter.LEFT, padx=10, pady=10)
+
+
+
+
 
 # Bottom bar frame
 navbar = customtkinter.CTkFrame(master=app, height=50, border_width=1, border_color="grey")
-navbar.pack(fill=customtkinter.X, side=customtkinter.BOTTOM, pady=10, padx=10)
+
 
 # navbar buttons
 navbar_btns = customtkinter.CTkFrame(master=navbar)
@@ -307,4 +342,5 @@ github_link = customtkinter.CTkLabel(master=navbar, text="Made by Morten Munk", 
 github_link.pack(side=customtkinter.BOTTOM, pady=10)
 github_link.bind("<Button-1>", lambda e:open_url("https://github.com/MortenMunk"))
 
+app = App()
 app.mainloop()
