@@ -220,8 +220,82 @@ class LoadMazeFrame(customtkinter.CTkFrame):
         self.load_maze_btn = customtkinter.CTkButton(self, text="Load maze", cursor="hand2", command=self.load_maze)
         self.load_maze_btn.pack(side=customtkinter.LEFT, padx=10, pady=10)
 
-    def load_maze():
-        return
+
+    def load_maze(self):
+        file_path = filedialog.askopenfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+
+        # read from file, and split into lines
+        with open(file_path, "r") as file:
+            maze_lines = file.readlines()
+
+        # if less than 2 lines, then the file does not follow correct format
+        try:
+            if len(maze_lines) < 2:
+                raise NotEnoughLinesInFile
+        except NotEnoughLinesInFile as e:
+            print(e.message)
+            return
+
+        # Checks if there is x and y values that are numeric
+        try:
+            dimensions = maze_lines[0].strip().split('x')
+            if len(dimensions) != 2 or not dimensions[0].isdigit() or not dimensions[1].isdigit():
+                raise InvalidGridDimension
+        except InvalidGridDimension as e:
+            print(e.message)
+            return
+
+        x_axis = int(dimensions[0])
+        y_axis = int(dimensions[1])
+
+        # checks the maze data has enough coordinates
+        try:
+            if len(maze_lines[1].strip()) != x_axis * y_axis:
+                raise InvalidGridValue
+        except InvalidGridValue as e:
+            print(e.message)
+            return
+
+        # save second line of file as maze data
+        maze_data = maze_lines[1].strip()
+
+        maze_state = self.master.maze_state
+        maze_state.clear()
+        self.master.is_start_placed = False
+        self.master.is_goal_placed = False
+
+        self.master.create_grid(x_axis, y_axis)
+
+        for row in range(y_axis):
+            for col in range(x_axis):
+                index = row * x_axis + col
+                char = maze_data[index]
+
+                if char == 'A':
+                    maze_state[(row, col)] = START
+                elif char == 'B':
+                    maze_state[(row, col)] = GOAL
+                elif char == '1':
+                    maze_state[(row, col)] = ROUTE
+                elif char == '0':
+                    maze_state[(row, col)] = EMPTY
+
+        # Redraw the maze based on the updated maze_state
+        for row in range(y_axis):
+            for col in range(x_axis):
+                cell_value = maze_state.get((row, col), EMPTY)
+                cell = self.master.grid_frame.grid_slaves(row=row, column=col)[0]
+                if cell_value == ROUTE:
+                    cell.configure(fg_color="white")
+                elif cell_value == START:
+                    cell.configure(fg_color="yellow")
+                elif cell_value == GOAL:
+                    cell.configure(fg_color="green")
+                elif cell_value == EMPTY:
+                    cell.configure(fg_color="black")
+
+        self.is_start_placed = any(val == START for val in maze_state.values())
+        self.is_goal_placed = any(val == GOAL for val in maze_state.values())
 
 
 class NavbarFrame(customtkinter.CTkFrame):
