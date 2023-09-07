@@ -8,6 +8,11 @@ customtkinter.set_appearance_mode("dark")
 customtkinter.set_default_color_theme("dark-blue")
 
 
+EMPTY = 0
+START = "A"
+GOAL = "B"
+ROUTE = 1
+
 class App(customtkinter.CTk):
     def __init__(self):
         super().__init__()
@@ -31,7 +36,11 @@ class ContentFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        # Entry frame
+        self.maze_state = {}
+        self.is_start_placed = False
+        self.is_goal_placed = False
+        self.grid_frame = None
+
         self.entry_frame = EntryFrame(self)
         self.entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
 
@@ -42,6 +51,131 @@ class ContentFrame(customtkinter.CTkFrame):
         # Load Maze Frame
         self.load_maze_frame = LoadMazeFrame(self)
         self.load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
+
+        self.grid_frame = None
+
+    def create_grid(self, columns, rows):
+        print("yo")
+        if self.grid_frame is not None:
+            self.grid_frame.destroy()
+        
+        self.maze_state.clear()
+        self.is_goal_placed = False
+        self.is_start_placed = False
+
+        self.grid_frame = customtkinter.CTkFrame(self)
+        self.grid_frame.pack(side=customtkinter.TOP, pady=10)
+
+        for row in range(rows):
+            for col in range(columns):
+                self.maze_state[(row, col)] = EMPTY
+                cell = customtkinter.CTkFrame(self.grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
+                cell.grid(row=row, column=col, padx=0, pady=0)
+                cell.bind("<Button-1>", self.change_cell_state)
+                cell.bind("<Button-3>", self.change_cell_state)
+
+        return self.grid_frame
+
+
+    def change_cell_state(self, event):
+        widget = event.widget
+        row = widget.master.grid_info()["row"]
+        col = widget.master.grid_info()["column"]
+        if event.num == 1:
+            if self.maze_state.get((row, col), EMPTY) == EMPTY:
+                self.maze_state[(row, col)] = ROUTE
+                widget.master.configure(fg_color="white")
+                print("Route placed")
+            elif self.maze_state.get((row, col), EMPTY) == ROUTE:
+                self.maze_state[(row, col)] = EMPTY
+                widget.master.configure(fg_color="black")
+                print("Route removed")
+            elif self.maze_state.get((row, col), EMPTY) == START or self.maze_state.get((row, col), EMPTY) == GOAL:
+                print("Cannot place route on goal or start")
+            else:
+                print("Undefined error")
+        elif event.num == 3:
+            if self.maze_state.get((row, col), EMPTY) == EMPTY or self.maze_state.get((row, col), ROUTE) == ROUTE:
+                if self.is_start_placed and not self.is_goal_placed:
+                    self.maze_state[(row, col)] = GOAL
+                    widget.master.configure(fg_color="green")
+                    self.is_goal_placed = True
+                    print("Goal placed")
+                elif not self.is_start_placed and self.is_goal_placed:
+                    self.maze_state[(row, col)] = START
+                    widget.master.configure(fg_color="yellow")
+                    self.is_start_placed = True
+                    print("Start placed")
+                elif not self.is_start_placed and not self.is_goal_placed:
+                    self.maze_state[(row, col)] = START
+                    self.is_start_placed = True
+                    widget.master.configure(fg_color="yellow")
+                    print("Start placed")
+                elif self.is_goal_placed and self.is_start_placed:
+                    print("Both start and goal placed")
+            elif self.maze_state.get((row, col), START) == START:
+                self.maze_state[(row, col)] = EMPTY
+                self.is_start_placed = False
+                widget.master.configure(fg_color="black")
+                print("Start removed")
+            elif self.maze_state.get((row, col), GOAL) == GOAL:
+                self.maze_state[(row, col)] = EMPTY
+                self.is_goal_placed = False
+                widget.master.configure(fg_color="black")
+                print("Goal removed")
+            else:
+                print("Undefined error")
+
+
+    def generate_grid(self):
+        columns = self.entry_frame.x_axis_entry.get()
+        rows = self.entry_frame.y_axis_entry.get()
+        print("hi")
+        try:
+            if not columns and not rows:
+                raise TypeError
+
+            if not columns.isdigit() and not rows.isdigit():
+                raise InvalidGridValue
+
+            columns = int(columns)
+            rows = int(rows)
+
+            if columns < 3 or rows < 3:
+                raise InvalidGridDimension
+            elif columns > 10 or rows > 10:
+                raise InvalidGridDimension
+
+            if self.grid_frame is not None:
+                self.grid_frame.destroy()
+            
+            return self.create_grid(columns, rows)
+        except TypeError as e:
+            print(e)
+            return
+        except InvalidGridValue as e:
+            print(e.message)
+            return
+        except InvalidGridDimension as e:
+            print(e.message)
+            return
+
+
+class EntryFrame(customtkinter.CTkFrame):
+    def __init__(self, master):
+        super().__init__(master)
+
+        self.x_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Columns", width=75)
+        self.x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
+
+        self.times_label = customtkinter.CTkLabel(self, text="X")
+        self.times_label.pack(side=customtkinter.LEFT)
+
+        self.y_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Rows", width=75)
+        self.y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
+
+        self.grid_btn = customtkinter.CTkButton(self, text="Generate grid", command=self.master.generate_grid)
+        self.grid_btn.pack(side=customtkinter.LEFT, padx=(0,20)) 
 
 
 class SwitchFrame(customtkinter.CTkFrame):
@@ -58,55 +192,6 @@ class SwitchFrame(customtkinter.CTkFrame):
     def switch_event(self):
         print("switch toggled, current value:", self.switch_var.get())
 
-
-class EntryFrame(customtkinter.CTkFrame):
-    def __init__(self, master):
-        super().__init__(master)
-
-        self.x_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Columns", width=75)
-        self.x_axis_entry.pack(side=customtkinter.LEFT, padx=(20,5), pady=10)
-
-        self.times_label = customtkinter.CTkLabel(self, text="X")
-        self.times_label.pack(side=customtkinter.LEFT)
-
-        self.y_axis_entry = customtkinter.CTkEntry(self, placeholder_text="Rows", width=75)
-        self.y_axis_entry.pack(side=customtkinter.LEFT, padx=(5,20))
-
-        self.grid_btn = customtkinter.CTkButton(self, text="Generate grid", command=self.generate_grid)
-        self.grid_btn.pack(side=customtkinter.LEFT, padx=(0,20))
-
-    def generate_grid(self):
-        column = self.x_axis_entry.get()
-        rows = self.y_axis_entry.get()
-
-        try:
-            if not column and not rows:
-                raise TypeError
-            
-            if not column.isdigit() and not rows.isdigit():
-                raise InvalidGridValue
-            
-            column = int(column)
-            rows = int(rows)
-
-            if column < 3 or rows < 3:
-                raise InvalidGridDimension
-            elif column > 10 or rows > 10:
-                raise InvalidGridDimension
-            
-            if hasattr(self.master, 'maze_frame'):
-                self.master.maze_frame.destroy()
-
-        except TypeError as e:
-            print(e)
-            return
-        except InvalidGridValue as e:
-            print(e.message)
-            return
-        except InvalidGridDimension as e:
-            print(e.message)
-            return
-        
 
 
 class LoadMazeFrame(customtkinter.CTkFrame):
