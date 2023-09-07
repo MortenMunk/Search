@@ -65,7 +65,7 @@ class ContentFrame(customtkinter.CTkFrame):
         self.is_start_placed = False
 
         self.grid_frame = customtkinter.CTkFrame(self)
-        self.grid_frame.pack(side=customtkinter.TOP, pady=10)
+        self.grid_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
 
         for row in range(rows):
             for col in range(columns):
@@ -312,7 +312,6 @@ class NavbarFrame(customtkinter.CTkFrame):
     def open_url(url):
         webbrowser.open_new_tab(url)
 
-# content_frame = customtkinter.CTkFrame(master=app, border_width=1, border_color="grey")
 
 
 class NavbarBtns(customtkinter.CTkFrame):
