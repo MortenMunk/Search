@@ -40,6 +40,8 @@ class ContentFrame(customtkinter.CTkFrame):
         self.is_start_placed = False
         self.is_goal_placed = False
         self.grid_frame = None
+        self.columns = None
+        self.rows = None
 
         self.entry_frame = EntryFrame(self)
         self.entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
@@ -55,7 +57,6 @@ class ContentFrame(customtkinter.CTkFrame):
         self.grid_frame = None
 
     def create_grid(self, columns, rows):
-        print("yo")
         if self.grid_frame is not None:
             self.grid_frame.destroy()
         
@@ -74,7 +75,23 @@ class ContentFrame(customtkinter.CTkFrame):
                 cell.bind("<Button-1>", self.change_cell_state)
                 cell.bind("<Button-3>", self.change_cell_state)
 
-        return self.grid_frame
+        save_maze_frame = customtkinter.CTkFrame(self)
+        save_maze_frame.pack(side=customtkinter.TOP)
+
+        save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=self.save_maze)
+        save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+
+
+    def save_maze(self):
+        file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
+        values = list(self.maze_state.values())
+        text = str(values)[1:-1].replace(",", "").replace(" ", "").replace("'", "")
+
+        if values and text:
+            with open(file_path, 'w') as file:
+                file.write(f"{self.columns}x{self.rows}\n")
+                file.write(text)
+                file.close()
 
 
     def change_cell_state(self, event):
@@ -130,7 +147,6 @@ class ContentFrame(customtkinter.CTkFrame):
     def generate_grid(self):
         columns = self.entry_frame.x_axis_entry.get()
         rows = self.entry_frame.y_axis_entry.get()
-        print("hi")
         try:
             if not columns and not rows:
                 raise TypeError
@@ -148,8 +164,11 @@ class ContentFrame(customtkinter.CTkFrame):
 
             if self.grid_frame is not None:
                 self.grid_frame.destroy()
-            
-            return self.create_grid(columns, rows)
+
+            self.create_grid(columns, rows)
+            self.columns = columns
+            self.rows = rows
+        
         except TypeError as e:
             print(e)
             return
