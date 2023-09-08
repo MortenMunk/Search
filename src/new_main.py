@@ -1,6 +1,7 @@
 from tkinter import filedialog
 import customtkinter
 import webbrowser
+from algo import *
 
 from exceptions import *
 
@@ -53,6 +54,13 @@ class ContentFrame(customtkinter.CTkFrame):
         # Load Maze Frame
         self.load_maze_frame = LoadMazeFrame(self)
         self.load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
+
+        # Components
+        node = Node
+        stack_frontier = StackFrontier
+        queue_frontier = QueueFrontier
+        maze = Maze
+
 
         self.grid_frame = None
 
