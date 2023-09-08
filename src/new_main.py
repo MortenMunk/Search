@@ -1,7 +1,7 @@
 from tkinter import filedialog
 import customtkinter
 import webbrowser
-from algo import *
+# from algo import *
 
 from exceptions import *
 
@@ -43,6 +43,7 @@ class ContentFrame(customtkinter.CTkFrame):
         self.grid_frame = None
         self.columns = None
         self.rows = None
+        self.save_maze_frame = False
 
         self.entry_frame = EntryFrame(self)
         self.entry_frame.pack(side=customtkinter.TOP, pady=10, padx=10)
@@ -56,10 +57,10 @@ class ContentFrame(customtkinter.CTkFrame):
         self.load_maze_frame.pack(side=customtkinter.BOTTOM, pady=10, padx=10)
 
         # Components
-        node = Node
-        stack_frontier = StackFrontier
-        queue_frontier = QueueFrontier
-        maze = Maze
+       # node = Node
+       # stack_frontier = StackFrontier
+       # queue_frontier = QueueFrontier
+       # maze = Maze
 
 
         self.grid_frame = None
@@ -83,11 +84,13 @@ class ContentFrame(customtkinter.CTkFrame):
                 cell.bind("<Button-1>", self.change_cell_state)
                 cell.bind("<Button-3>", self.change_cell_state)
 
-        save_maze_frame = customtkinter.CTkFrame(self)
-        save_maze_frame.pack(side=customtkinter.TOP)
+        if self.save_maze_frame is False:
+            save_maze_frame = customtkinter.CTkFrame(self)
+            save_maze_frame.pack(side=customtkinter.BOTTOM)
 
-        save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=self.save_maze)
-        save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+            save_maze_btn = customtkinter.CTkButton(master=save_maze_frame, text="Save maze", command=self.save_maze)
+            save_maze_btn.pack(side=customtkinter.LEFT, padx=20, pady=10)
+            self.save_maze_frame = True
 
 
     def save_maze(self):
