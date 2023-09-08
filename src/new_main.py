@@ -2,7 +2,7 @@ from tkinter import filedialog
 import customtkinter
 import webbrowser
 from algo import *
-
+import functools
 from exceptions import *
 
 customtkinter.set_appearance_mode("dark")
@@ -75,7 +75,7 @@ class ContentFrame(customtkinter.CTkFrame):
             search_frame = customtkinter.CTkFrame(self.switch_cont_frame)
             search_frame.pack(side=customtkinter.BOTTOM, padx=20, pady=(0,10))
 
-            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=self.search(self.maze_state))
+            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=functools.partial(self.search, self.maze_state))
             search_btn.pack(side=customtkinter.BOTTOM, padx=20, pady=10)
         
 

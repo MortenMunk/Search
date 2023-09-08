@@ -45,6 +45,9 @@ class Maze():
 
     def __init__(self, maze_state):
 
+        self.start = None
+        self.goal = None
+
         # Validate start and goal
         try:
             if maze_state.count("A") != 1 or maze_state.count("B") != 1:
@@ -70,7 +73,7 @@ class Maze():
                     elif maze_state.get((row,col)) == "B":
                         self.goal = (row, col)
                         row.append(False)
-                    elif maze_state.get((row,col)) == "0":
+                    elif maze_state.get((row,col)) == "1":
                         row.append(False)
                     else:
                         row.append(True)
