@@ -37,7 +37,8 @@ class ContentFrame(customtkinter.CTkFrame):
     def __init__(self, master):
         super().__init__(master)
 
-        self.maze_state = {}
+        # Empty 2D array
+        self.maze_state = []
         self.is_start_placed = False
         self.is_goal_placed = False
         self.grid_frame = None
@@ -61,7 +62,7 @@ class ContentFrame(customtkinter.CTkFrame):
         if self.grid_frame is not None:
             self.grid_frame.destroy()
         
-        self.maze_state.clear()
+        self.maze_state = [[EMPTY for _ in range(columns)] for _ in range(rows)]
         self.is_goal_placed = False
         self.is_start_placed = False
 
@@ -75,7 +76,7 @@ class ContentFrame(customtkinter.CTkFrame):
             search_frame = customtkinter.CTkFrame(self.switch_cont_frame)
             search_frame.pack(side=customtkinter.BOTTOM, padx=20, pady=(0,10))
 
-            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=functools.partial(self.search, self.maze_state))
+            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=functools.partial(self.search))
             search_btn.pack(side=customtkinter.BOTTOM, padx=20, pady=10)
         
 
@@ -84,30 +85,30 @@ class ContentFrame(customtkinter.CTkFrame):
 
         for row in range(rows):
             for col in range(columns):
-                self.maze_state[(row, col)] = EMPTY
+                self.maze_state[row][col] = EMPTY
                 cell = customtkinter.CTkFrame(self.grid_frame, border_width=1, border_color="lightblue", width=30, height=30, corner_radius=0, fg_color="black")
                 cell.grid(row=row, column=col, padx=0, pady=0)
                 cell.bind("<Button-1>", self.change_cell_state)
                 cell.bind("<Button-3>", self.change_cell_state)
 
-        print(str(self.maze_state))
 
     
-    def search(self, maze_state):
-        m = Maze(str(maze_state))
+    def search(self):
+        print(self.rows)
+        print(self.columns)
+        m = Maze(self.maze_state, self.rows, self.columns)
         m.solve()
         m.output_image("maze.png", show_explored=True)
 
 
     def save_maze(self):
         file_path = filedialog.asksaveasfilename(defaultextension=".txt", filetypes=[("Text files", "*.txt")])
-        values = list(self.maze_state.values())
-        text = str(values)[1:-1].replace(",", "").replace(" ", "").replace("'", "")
-
-        if values and text:
+        if self.maze_state:
             with open(file_path, 'w') as file:
-                file.write(f"{self.columns}x{self.rows}\n")
-                file.write(text)
+                for row in range(self.rows):
+                    for col in range(self.columns):
+                        file.write(str(self.maze_state[row][col]))
+                    file.write("\n")
                 file.close()
 
 
@@ -116,75 +117,80 @@ class ContentFrame(customtkinter.CTkFrame):
         row = widget.master.grid_info()["row"]
         col = widget.master.grid_info()["column"]
         if event.num == 1:
-            if self.maze_state.get((row, col), EMPTY) == EMPTY:
-                self.maze_state[(row, col)] = ROUTE
+            if self.maze_state[row][col] == EMPTY:
+                self.maze_state[row][col] = ROUTE
                 widget.master.configure(fg_color="white")
                 print("Route placed")
-            elif self.maze_state.get((row, col), EMPTY) == ROUTE:
-                self.maze_state[(row, col)] = EMPTY
+            elif self.maze_state[row][col] == ROUTE:
+                self.maze_state[row][col] = EMPTY
                 widget.master.configure(fg_color="black")
                 print("Route removed")
-            elif self.maze_state.get((row, col), EMPTY) == START or self.maze_state.get((row, col), EMPTY) == GOAL:
+            elif self.maze_state[row][col] == START or self.maze_state[row][col] == GOAL:
                 print("Cannot place route on goal or start")
             else:
                 print("Undefined error")
         elif event.num == 3:
-            if self.maze_state.get((row, col), EMPTY) == EMPTY or self.maze_state.get((row, col), ROUTE) == ROUTE:
+            if self.maze_state[row][col] == EMPTY or self.maze_state[row][col] == ROUTE:
                 if self.is_start_placed and not self.is_goal_placed:
-                    self.maze_state[(row, col)] = GOAL
+                    self.maze_state[row][col] = GOAL
                     widget.master.configure(fg_color="green")
                     self.is_goal_placed = True
                     print("Goal placed")
                 elif not self.is_start_placed and self.is_goal_placed:
-                    self.maze_state[(row, col)] = START
+                    self.maze_state[row][col] = START
                     widget.master.configure(fg_color="yellow")
                     self.is_start_placed = True
                     print("Start placed")
                 elif not self.is_start_placed and not self.is_goal_placed:
-                    self.maze_state[(row, col)] = START
+                    self.maze_state[row][col] = START
                     self.is_start_placed = True
                     widget.master.configure(fg_color="yellow")
                     print("Start placed")
                 elif self.is_goal_placed and self.is_start_placed:
                     print("Both start and goal placed")
-            elif self.maze_state.get((row, col), START) == START:
-                self.maze_state[(row, col)] = EMPTY
+            elif self.maze_state[row][col] == START:
+                self.maze_state[row][col] = EMPTY
                 self.is_start_placed = False
                 widget.master.configure(fg_color="black")
                 print("Start removed")
-            elif self.maze_state.get((row, col), GOAL) == GOAL:
-                self.maze_state[(row, col)] = EMPTY
+            elif self.maze_state[row][col] == GOAL:
+                self.maze_state[row][col] = EMPTY
                 self.is_goal_placed = False
                 widget.master.configure(fg_color="black")
                 print("Goal removed")
             else:
                 print("Undefined error")
+        print(str(self.maze_state))
 
 
     def generate_grid(self):
-        columns = self.entry_frame.x_axis_entry.get()
-        rows = self.entry_frame.y_axis_entry.get()
+        self.columns = self.entry_frame.x_axis_entry.get()
+        self.rows = self.entry_frame.y_axis_entry.get()
         try:
-            if not columns and not rows:
+            if not self.columns and not self.rows:
                 raise TypeError
 
-            if not columns.isdigit() and not rows.isdigit():
+            if not self.columns.isdigit() and not self.rows.isdigit():
                 raise InvalidGridValue
 
-            columns = int(columns)
-            rows = int(rows)
+            self.columns = int(self.columns)
+            self.rows = int(self.rows)
 
-            if columns < 3 or rows < 3:
+            if self.columns < 3 or self.rows < 3:
                 raise InvalidGridDimension
-            elif columns > 10 or rows > 10:
+            elif self.columns > 10 or self.rows > 10:
                 raise InvalidGridDimension
 
             if self.grid_frame is not None:
                 self.grid_frame.destroy()
 
-            self.create_grid(columns, rows)
-            self.columns = columns
-            self.rows = rows
+            for _ in range(self.rows):
+                row = []
+                for _ in range(self.columns):
+                    row.append(None)
+                    self.maze_state.append(row)
+
+            self.create_grid(self.columns, self.rows)
         
         except TypeError as e:
             print(e)
@@ -251,64 +257,57 @@ class LoadMazeFrame(customtkinter.CTkFrame):
 
         # read from file, and split into lines
         with open(file_path, "r") as file:
-            maze_lines = file.readlines()
+            content = file.read().splitlines()
 
-        # if less than 2 lines, then the file does not follow correct format
         try:
-            if len(maze_lines) < 2:
+            start_count = sum(row.count('A') for row in content)
+            goal_count = sum(row.count('B') for row in content)
+            if start_count != 1 or goal_count != 1:
+                raise MazeNeedsStartAndGoal
+        except MazeNeedsStartAndGoal as e:
+            print(e.message)
+            return
+    
+        rows = len(content)
+        columns = len(content[0])
+
+        try:
+            # if less than 3 rows or columns throw error
+            if columns < 3 or rows < 3:
                 raise NotEnoughLinesInFile
+            # if more than 10 rows or columns throw error
+            elif columns > 10 or rows > 10:
+                raise InvalidGridDimension
         except NotEnoughLinesInFile as e:
             print(e.message)
             return
-
-        # Checks if there is x and y values that are numeric
-        try:
-            dimensions = maze_lines[0].strip().split('x')
-            if len(dimensions) != 2 or not dimensions[0].isdigit() or not dimensions[1].isdigit():
-                raise InvalidGridDimension
         except InvalidGridDimension as e:
             print(e.message)
             return
 
-        x_axis = int(dimensions[0])
-        y_axis = int(dimensions[1])
-
-        # checks the maze data has enough coordinates
-        try:
-            if len(maze_lines[1].strip()) != x_axis * y_axis:
-                raise InvalidGridValue
-        except InvalidGridValue as e:
-            print(e.message)
-            return
 
         # save second line of file as maze data
-        maze_data = maze_lines[1].strip()
-
-        maze_state = self.master.maze_state
-        maze_state.clear()
+        self.master.maze_state.clear()
         self.master.is_start_placed = False
         self.master.is_goal_placed = False
 
-        self.master.create_grid(x_axis, y_axis)
+        self.master.create_grid(columns, rows)
 
-        for row in range(y_axis):
-            for col in range(x_axis):
-                index = row * x_axis + col
-                char = maze_data[index]
-
-                if char == 'A':
-                    maze_state[(row, col)] = START
-                elif char == 'B':
-                    maze_state[(row, col)] = GOAL
-                elif char == '1':
-                    maze_state[(row, col)] = ROUTE
-                elif char == '0':
-                    maze_state[(row, col)] = EMPTY
+        for row in range(rows):
+            for col in range(columns):
+                if content[row][col] == 'A':
+                    self.master.maze_state[row][col] = START
+                elif content[row][col] == 'B':
+                    self.master.maze_state[row][col] = GOAL
+                elif content[row][col] == '1':
+                    self.master.maze_state[row][col] = ROUTE
+                elif content[row][col] == '0':
+                    self.master.maze_state[row][col] = EMPTY
 
         # Redraw the maze based on the updated maze_state
-        for row in range(y_axis):
-            for col in range(x_axis):
-                cell_value = maze_state.get((row, col), EMPTY)
+        for row in range(rows):
+            for col in range(columns):
+                cell_value = self.master.maze_state[row][col]
                 cell = self.master.grid_frame.grid_slaves(row=row, column=col)[0]
                 if cell_value == ROUTE:
                     cell.configure(fg_color="white")
@@ -319,8 +318,9 @@ class LoadMazeFrame(customtkinter.CTkFrame):
                 elif cell_value == EMPTY:
                     cell.configure(fg_color="black")
 
-        self.is_start_placed = any(val == START for val in maze_state.values())
-        self.is_goal_placed = any(val == GOAL for val in maze_state.values())
+        self.is_start_placed = True
+        self.is_goal_placed = True
+        print(self.master.maze_state)
 
 
 class NavbarFrame(customtkinter.CTkFrame):

@@ -1,6 +1,14 @@
 from PIL import Image, ImageDraw
 from exceptions import *
 
+def is_value_present_once(dict, target_value):
+    count = 0
+    for value in dict.values():
+        if value == target_value:
+            count += 1
+            if count > 1:
+                return False  # The value occurs more than once
+    return count == 1  # The value occurs exactly once
 
 class Node():
     def __init__(self, state, parent, action):
@@ -43,37 +51,35 @@ class QueueFrontier(StackFrontier):
 
 class Maze():
 
-    def __init__(self, maze_state):
+    def __init__(self, maze_state, rows, columns):
 
+        self.rows = rows
+        self.columns = columns
         self.start = None
         self.goal = None
+        self.walls = []
 
         # Validate start and goal
         try:
-            if maze_state.count("A") != 1 or maze_state.count("B") != 1:
+            if not is_value_present_once(maze_state, 'A') or not is_value_present_once(maze_state, 'B'):
                 raise MazeNeedsStartAndGoal
         except MazeNeedsStartAndGoal as e:
             print(e.message)
             return
         
 
-        # Determine height and width of maze
-        self.rows = len(maze_state)
-        self.cols = max(len(line) for line in maze_state)
-
-        # Keep track of walls
-        self.walls = []
-        for row in range(self.rows):
+        # Keep track of walls  
+        for row_idx in range(self.rows):
             row = []
-            for col in range(self.cols):
+            for col in range(self.columns):
                 try:
-                    if maze_state.get((row,col)) == "A":
-                        self.start = (row, col)
+                    if maze_state[(row_idx, col)] == "A":
+                        self.start = (row_idx, col)
                         row.append(False)
-                    elif maze_state.get((row,col)) == "B":
-                        self.goal = (row, col)
+                    elif maze_state[(row_idx, col)] == "B":
+                        self.goal = (row_idx, col)
                         row.append(False)
-                    elif maze_state.get((row,col)) == "1":
+                    elif maze_state[(row_idx, col)] == "1":
                         row.append(False)
                     else:
                         row.append(True)
@@ -95,7 +101,7 @@ class Maze():
 
         result = []
         for action, (r, c) in candidates:
-            if 0 <= r < self.rows and 0 <= c < self.cols and not self.walls[r][c]:
+            if 0 <= r < self.rows and 0 <= c < self.columns and not self.walls[r][c]:
                 result.append((action, (r, c)))
         return result
 
@@ -155,7 +161,7 @@ class Maze():
         # Create a blank canvas
         img = Image.new(
             "RGBA",
-            (self.rows * cell_size, self.cols * cell_size),
+            (self.rows * cell_size, self.columns * cell_size),
             "black"
         )
         draw = ImageDraw.Draw(img)
