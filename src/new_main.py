@@ -94,11 +94,11 @@ class ContentFrame(customtkinter.CTkFrame):
 
     
     def search(self):
-        print(self.rows)
-        print(self.columns)
-        m = Maze(self.maze_state, self.rows, self.columns)
+        m = Maze(self.maze_state)
+        m.print()
         m.solve()
-        m.output_image("maze.png", show_explored=True)
+        m.print()
+        m.save_gif()
 
 
     def save_maze(self):
