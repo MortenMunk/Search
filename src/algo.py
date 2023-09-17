@@ -118,7 +118,7 @@ class Maze():
         return result
 
 
-    def solve(self):
+    def solve(self, search_type):
         """Finds a solution to maze, if one exists."""
 
         # Keep track of number of states explored
@@ -126,8 +126,19 @@ class Maze():
 
         # Initialize frontier to just the starting position
         start = Node(state=self.start, parent=None, action=None)
-        frontier = StackFrontier()
+        try:
+            if search_type == "dfs":
+                frontier = StackFrontier()
+            elif search_type == "bfs":
+                frontier = QueueFrontier()
+            else:
+                raise InvalidSearchType
+        except InvalidSearchType as e:
+            print(e.message)
+            return    
+            
         frontier.add(start)
+
 
         # Initialize an empty explored set
         self.explored = set()

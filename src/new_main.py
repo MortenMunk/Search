@@ -76,7 +76,7 @@ class ContentFrame(customtkinter.CTkFrame):
             search_frame = customtkinter.CTkFrame(self.switch_cont_frame)
             search_frame.pack(side=customtkinter.BOTTOM, padx=20, pady=(0,10))
 
-            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=functools.partial(self.search))
+            search_btn = customtkinter.CTkButton(search_frame, text="Search", command=lambda: self.search(search_type=self.switch_cont_frame.switch_frame.get_switch_var()))
             search_btn.pack(side=customtkinter.BOTTOM, padx=20, pady=10)
         
 
@@ -93,10 +93,10 @@ class ContentFrame(customtkinter.CTkFrame):
 
 
     
-    def search(self):
+    def search(self, search_type):
         m = Maze(self.maze_state)
         m.print()
-        m.solve()
+        m.solve(search_type=search_type)
         m.print()
         m.save_gif()
 
@@ -234,13 +234,13 @@ class SwitchFrame(customtkinter.CTkFrame):
 
         self.switch_label_dfs = customtkinter.CTkLabel(self, text="Depth-first", cursor="hand2")
         self.switch_label_dfs.pack(side=customtkinter.LEFT, padx=(20,5))
+        self.switch_var = customtkinter.StringVar(value="dfs")
 
-        self.switch_var = customtkinter.StringVar(value="DFS")
-        self.switch = customtkinter.CTkSwitch(self, command=self.switch_event, text="Breadth-first", variable=self.switch_var, onvalue="DFS", offvalue="BFS", switch_width=40)
+        self.switch = customtkinter.CTkSwitch(self, text="Breadth-first", variable=self.switch_var, onvalue="bfs", offvalue="dfs", switch_width=40)
         self.switch.pack(side=customtkinter.LEFT, pady=10, padx=(5,20))
 
-    def switch_event(self):
-        print("switch toggled, current value:", self.switch_var.get())
+    def get_switch_var(self):
+        return self.switch_var.get()
 
 
 

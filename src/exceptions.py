@@ -21,3 +21,7 @@ class TooManyLinesInFile(Exception):
 class NotEnoughLinesInFile(Exception):
     message = "Not enough lines in file"
     pass
+
+class InvalidSearchType(Exception):
+    message = "Invalid search type"
+    pass
