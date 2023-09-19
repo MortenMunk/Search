@@ -120,11 +120,9 @@ class ContentFrame(customtkinter.CTkFrame):
             if self.maze_state[row][col] == EMPTY:
                 self.maze_state[row][col] = ROUTE
                 widget.master.configure(fg_color="white")
-                print("Route placed")
             elif self.maze_state[row][col] == ROUTE:
                 self.maze_state[row][col] = EMPTY
                 widget.master.configure(fg_color="black")
-                print("Route removed")
             elif self.maze_state[row][col] == START or self.maze_state[row][col] == GOAL:
                 print("Cannot place route on goal or start")
             else:
@@ -135,29 +133,24 @@ class ContentFrame(customtkinter.CTkFrame):
                     self.maze_state[row][col] = GOAL
                     widget.master.configure(fg_color="green")
                     self.is_goal_placed = True
-                    print("Goal placed")
                 elif not self.is_start_placed and self.is_goal_placed:
                     self.maze_state[row][col] = START
                     widget.master.configure(fg_color="yellow")
                     self.is_start_placed = True
-                    print("Start placed")
                 elif not self.is_start_placed and not self.is_goal_placed:
                     self.maze_state[row][col] = START
                     self.is_start_placed = True
                     widget.master.configure(fg_color="yellow")
-                    print("Start placed")
                 elif self.is_goal_placed and self.is_start_placed:
                     print("Both start and goal placed")
             elif self.maze_state[row][col] == START:
                 self.maze_state[row][col] = EMPTY
                 self.is_start_placed = False
                 widget.master.configure(fg_color="black")
-                print("Start removed")
             elif self.maze_state[row][col] == GOAL:
                 self.maze_state[row][col] = EMPTY
                 self.is_goal_placed = False
                 widget.master.configure(fg_color="black")
-                print("Goal removed")
             else:
                 print("Undefined error")
         print(str(self.maze_state))
@@ -320,7 +313,6 @@ class LoadMazeFrame(customtkinter.CTkFrame):
 
         self.is_start_placed = True
         self.is_goal_placed = True
-        print(self.master.maze_state)
 
 
 class NavbarFrame(customtkinter.CTkFrame):

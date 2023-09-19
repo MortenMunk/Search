@@ -1,9 +1,9 @@
 import datetime
-from PIL import Image, ImageDraw
+import os
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 from exceptions import *
 
 def contains_start_and_goal(maze):
-    print(maze)
     try:
         if maze.count("A") != 1 and maze.count("B") != 1:
             raise MazeNeedsStartAndGoal
@@ -67,7 +67,6 @@ class Maze():
             row = []
             for j in range(self.width):
                 try:
-                    print(maze_state[i][j])
                     if maze_state[i][j] == "A":
                         self.start = (i, j)
                         row.append(False)
@@ -178,46 +177,67 @@ class Maze():
 
 
     def generate_frames(self, show_solution=True, show_explored=True):
-        frames = []
-        cell_size = 50
-        cell_border = 2
-    
-        for step in range(len(self.solution[1])):
-            img = Image.new(
-                "RGBA",
-                (self.height * cell_size, self.width * cell_size),
-                "black"
-            )
-            draw = ImageDraw.Draw(img)
-    
-            current_state = self.solution[1][step]
-    
-            for i, row in enumerate(self.walls):
-                for j, col in enumerate(row):
-                    if col:
-                        fill = (40, 40, 40)
-                    elif (i, j) == self.start:
-                        fill = (255, 0, 0)
-                    elif (i, j) == self.goal:
-                        fill = (0, 171, 28)
-                    elif show_solution and (i, j) == current_state:
-                        fill = (220, 235, 113)
-                    elif show_explored and (i, j) in self.explored:
-                        fill = (212, 97, 85)
-                    else:
-                        fill = (237, 240, 252)
-    
-                    draw.rectangle(
-                        ([(j * cell_size + cell_border, i * cell_size + cell_border),
-                          ((j + 1) * cell_size - cell_border, (i + 1) * cell_size - cell_border)]),
-                        fill=fill
-                    )
-    
-            # Append the current image to the frames list
-            frames.append(img)
-    
-        return frames
+      frames = []
+      cell_size = 50
+      cell_border = 2
 
+      # Provide the path to your own font file (.ttf)
+      relative_path = os.getcwd()
+      font_path = "VCR_OSD_MONO_1.001.ttf"
+      font_path = relative_path + '\\' + font_path
+      font_size = 16  # Adjust the font size as needed
+      font = ImageFont.truetype(font_path, font_size)
+
+      for step in range(len(self.solution[1])):
+          img = Image.new(
+              "RGBA",
+              (self.height * cell_size, self.width * cell_size),
+              "black"
+          )
+          draw = ImageDraw.Draw(img)
+
+          current_state = self.solution[1][step]
+
+          for i, row in enumerate(self.walls):
+              for j, col in enumerate(row):
+                  if col:
+                      fill = (40, 40, 40)
+                  elif (i, j) == self.start:
+                      fill = (255, 0, 0)
+                  elif (i, j) == self.goal:
+                      fill = (0, 171, 28)
+                  elif show_solution and (i, j) == current_state:
+                      fill = (220, 235, 113)
+                  elif show_explored and (i, j) in self.explored:
+                      fill = (212, 97, 85)
+                  else:
+                      fill = (237, 240, 252)
+
+                  draw.rectangle(
+                      ([(j * cell_size + cell_border, i * cell_size + cell_border),
+                        ((j + 1) * cell_size - cell_border, (i + 1) * cell_size - cell_border)]),
+                      fill=fill
+                  )
+
+                  # Draw the step number inside the rectangle
+                  if (i, j) == current_state:
+                      text = str(step + 1)  # Step numbers start from 1
+
+                      # Calculate text size and position using textsize
+                      text_box = draw.textbbox((j * cell_size, i * cell_size), text, font=font)
+                      text_width = text_box[2] - text_box[0]
+                      text_height = text_box[3] - text_box[1]
+                      
+                      text_x = (j * cell_size + (cell_size - text_width) // 2)
+                      text_y = (i * cell_size + (cell_size - text_height) // 2)
+
+                      # Draw text on the image
+                      draw.text((text_x, text_y), text, fill=(0, 0, 0), font=font)
+
+          # Append the current image to the frames list
+          frames.append(img)
+
+      return frames
 
 
 
